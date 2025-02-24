@@ -1,0 +1,116 @@
+-- INIT database
+CREATE TABLE Departmants (
+  ID INT AUTO_INCREMENT KEY,
+  Name VARCHAR(100)
+);
+
+CREATE TABLE Wards (
+  ID INT AUTO_INCREMENT KEY,
+  Name VARCHAR(100),
+  DepartmantID INT,
+  FOREIGN KEY (DepartmantID) REFERENCES Departmants(ID)
+);
+
+CREATE TABLE Sponsors (
+  ID INT AUTO_INCREMENT KEY,
+  Name VARCHAR(100)
+);
+
+CREATE TABLE Donations (
+  ID INT AUTO_INCREMENT KEY,
+  Amount INT,
+  DATES DATE,
+  DepartmantsID INT,
+  SponsorsID INT,
+  FOREIGN KEY (DepartmantsID) REFERENCES Departmants(ID),
+  FOREIGN KEY (SponsorsID) REFERENCES Sponsors(ID)
+);
+
+CREATE TABLE Specializations (
+  ID INT AUTO_INCREMENT KEY,
+  Name VARCHAR(100)
+);
+
+CREATE TABLE Doctors (
+  ID INT AUTO_INCREMENT KEY,
+  Name VARCHAR(100),
+  Premium decimal,
+  Salary DECIMAL,
+  Surname VARCHAR(100),
+  DepartmantsID INT,
+  FOREIGN KEY (DepartmantsID) REFERENCES Departmants(ID)
+);
+
+CREATE TABLE DoctorsSpecializations (
+  ID INT AUTO_INCREMENT KEY,
+  DoctorID INT,
+  SpecializationsID INT,
+  FOREIGN KEY (DoctorID) REFERENCES Doctors(ID),
+  FOREIGN KEY (SpecializationsID) REFERENCES Specializations(ID)
+);
+
+CREATE TABLE Vacations (
+  ID INT AUTO_INCREMENT KEY,
+  EndDate DATE,
+  StartDate DATE,
+  DoctorID INT,
+  FOREIGN KEY (DoctorID) REFERENCES Doctors(ID)
+);
+
+-- Insert Departments
+INSERT INTO Departmants (Name) VALUES ('Cardiology');
+INSERT INTO Departmants (Name) VALUES ('Neurology');
+INSERT INTO Departmants (Name) VALUES ('Orthopedics');
+
+-- Insert Wards
+INSERT INTO Wards (Name, DepartmantID) VALUES ('Ward A', 1);
+INSERT INTO Wards (Name, DepartmantID) VALUES ('Ward B', 2);
+INSERT INTO Wards (Name, DepartmantID) VALUES ('Ward C', 3);
+
+-- Insert Sponsors
+INSERT INTO Sponsors (Name) VALUES ('Pharma Co');
+INSERT INTO Sponsors (Name) VALUES ('MedTech Corp');
+INSERT INTO Sponsors (Name) VALUES ('Healthy Life Foundation');
+
+-- Insert Donations
+INSERT INTO Donations (Amount, DATES, DepartmantsID, SponsorsID) 
+VALUES (10000, '2025-01-01', 1, 1);
+INSERT INTO Donations (Amount, DATES, DepartmantsID, SponsorsID) 
+VALUES (5000, '2025-01-05', 2, 2);
+INSERT INTO Donations (Amount, DATES, DepartmantsID, SponsorsID) 
+VALUES (7000, '2025-01-10', 3, 3);
+
+-- Insert Specializations
+INSERT INTO Specializations (Name) VALUES ('Cardiologist');
+INSERT INTO Specializations (Name) VALUES ('Neurologist');
+INSERT INTO Specializations (Name) VALUES ('Orthopedic Surgeon');
+
+-- Insert Doctors
+INSERT INTO Doctors (Name, Premium, Salary, Surname) VALUES ('John', 5000, 80000, 'Doe');
+INSERT INTO Doctors (Name, Premium, Salary, Surname) VALUES ('Jane', 4000, 75000, 'Smith');
+INSERT INTO Doctors (Name, Premium, Salary, Surname) VALUES ('Emily', 3500, 72000, 'Jones');
+
+-- Insert Doctors Specializations
+INSERT INTO DoctorsSpecializations (DoctorID, SpecializationsID) VALUES (1, 1);
+INSERT INTO DoctorsSpecializations (DoctorID, SpecializationsID) VALUES (2, 2);
+INSERT INTO DoctorsSpecializations (DoctorID, SpecializationsID) VALUES (3, 3);
+
+-- Insert Vacations
+INSERT INTO Vacations (StartDate, EndDate, DoctorID) VALUES ('2025-03-01', '2025-03-10', 1);
+INSERT INTO Vacations (StartDate, EndDate, DoctorID) VALUES ('2024-04-01', '2024-04-10', 2);
+INSERT INTO Vacations (StartDate, EndDate, DoctorID) VALUES ('2025-05-01', '2025-05-07', 3);
+
+
+SELECT * FROM Wards;
+SELECT * FROM Departmants;
+SELECT * FROM Donations;
+SELECT * FROM Sponsors;
+SELECT * FROM Specializations;
+SELECT * FROM DoctorsSpecializations;
+SELECT * FROM Doctors;
+SELECT * FROM Vacations;
+
+SELECT Doctors.Surname, Doctors.Salary + Doctors.Premium FROM Doctors, Vacations WHERE Doctors.ID = Vacations.DoctorID AND Vacations.EndDate < "2025-02-24";
+
+SELECT Departmants.Name, Sponsors.Name, Donations.Amount FROM Departmants, Sponsors, Donations
+WHERE Donations.Dates > "2025-01-24" AND Sponsors.ID = Donations.SponsorID;
