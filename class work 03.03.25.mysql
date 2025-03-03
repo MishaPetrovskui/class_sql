@@ -1,0 +1,138 @@
+using MySql.Data;
+using MySql.Data.MySqlClient;
+using Mysqlx.Datatypes;
+using System.Xml.Linq;
+using System.Text;
+
+class Doctor
+{
+    public int ID { get; set; }
+    public string Name { get; set; }
+    public double Premium { get; set; }
+    public double Salary { get; set; }
+
+    public Doctor(int ID, string name, double premium, double salary)
+    {
+        this.ID = ID;
+        this.Name = name;
+        this.Premium = premium;
+        this.Salary = salary;
+    }
+}
+
+class Program
+{
+    static void CreateDoktors(MySqlConnection conection)
+    {
+        string query = 
+            "CREATE TABLE IF NOT EXISTS Doctors (" + 
+            "ID INT AUTO_INCREMENT PRIMARY KEY," +
+            "Name VARCHAR(100)," + 
+            "Premium DOUBLE," + 
+            "Salary DOUBLE"+
+            ");";
+
+        using (MySqlCommand command = new MySqlCommand(query, conection))
+        {
+            command.ExecuteNonQuery();
+        }
+    }
+
+    static void CreateDepartments(MySqlConnection conection)
+    {
+        string query =
+            "CREATE TABLE IF NOT EXISTS Departments (" +
+            "ID INT AUTO_INCREMENT PRIMARY KEY," +
+            "Name VARCHAR(100)" +
+            ");";
+
+        using (MySqlCommand command = new MySqlCommand(query, conection))
+        {
+            command.ExecuteNonQuery();
+        }
+    }
+
+    static void AddDoctor(MySqlConnection conection, string Name, double Premium, double Salary)
+    {
+        string query =
+            "INSERT INTO Doctors(Name, Premium, Salary) VALUES (@name, @premium, @salary);";
+
+        using (MySqlCommand command = new MySqlCommand(query, conection))
+        {
+            command.Parameters.AddWithValue("name", Name);
+            command.Parameters.AddWithValue("premium", Premium);
+            command.Parameters.AddWithValue("salary", Salary);
+            command.ExecuteNonQuery();
+        }
+    }
+
+    static void AddDepartments(MySqlConnection conection, string Name, double Premium, double Salary)
+    {
+        string query =
+            "INSERT INTO Departments (Name) VALUES ('Cardiology'), ('Neurology'), ('Orthopedics'), ('Pediatrics'), ('Surgery');";
+
+        using (MySqlCommand command = new MySqlCommand(query, conection))
+        {
+            command.ExecuteNonQuery();
+        }
+    }
+
+    static List<Doctor> GetDoctors(MySqlConnection conection)
+    {
+        List<Doctor> list = new List<Doctor>();
+        string query =
+            "SELECT * FROM Doctors";
+
+        using (MySqlCommand command = new MySqlCommand(query, conection))
+        using (MySqlDataReader reader = command.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                list.Add(new Doctor(((int)reader["ID"]), ((string)reader["Name"]), ((double)reader["Premium"]), ((double)reader["Salary"])));
+            }
+        }
+        return list;
+    }
+
+    static void ShowDoctors(MySqlConnection conection, List<Doctor> list)
+    {
+        Console.WriteLine("ID\t Name\t\t Premium  Salary");
+        foreach (Doctor doctor in list)
+        {
+            Console.WriteLine($"{doctor.ID}\t| {doctor.Name}\t| {doctor.Premium}\t| {doctor.Salary}");
+        }
+    }
+
+    public static void Main(string[] args)
+    {
+        Console.OutputEncoding = UTF8Encoding.UTF8;
+        Console.InputEncoding = UTF8Encoding.UTF8;
+
+        string db_host = "localhost";
+        string db_database = "hospital";
+        string db_user = "root";
+        string db_password = "";
+
+        string conectionString = $"Server={db_host};Database={db_database};User ID={db_user};Password={db_password};";
+
+        using (MySqlConnection conection = new MySqlConnection(conectionString))
+        {
+            try 
+            { 
+                conection.Open();
+                CreateDoktors(conection);
+                AddDoctor(conection, "Іванов Іван", 9999, 200000);
+                //List<Doctor> a = GetDoctors(conection); Console.WriteLine();
+                ShowDoctors(conection, GetDoctors(conection));
+
+                CreateDepartments(conection);
+                AddDepartments(conection);
+            } 
+            catch (Exception ex) 
+            { 
+                Console.WriteLine($"Error: {ex.Message}"); 
+            }
+            
+        }
+    }
+}
