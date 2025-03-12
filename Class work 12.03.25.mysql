@@ -1,0 +1,118 @@
+-- INIT database
+CREATE TABLE Goods (
+  ID INT AUTO_INCREMENT KEY,
+  Name VARCHAR(100),
+  Price DECIMAL,
+  Category VARCHAR(100),
+  QuantityInStock INT
+);
+
+CREATE TABLE Сlient (
+  ID INT AUTO_INCREMENT KEY,
+  Name VARCHAR(100),
+  Surname VARCHAR(100),
+  ContactNumber VARCHAR(100)
+);
+
+CREATE TABLE Orders (
+  ID INT AUTO_INCREMENT KEY,
+  Name VARCHAR(100),
+  ClientID INT,
+  DateOfRegistration DATE,
+  Status BOOL
+);
+
+CREATE TABLE OrderDetails (
+  ID INT AUTO_INCREMENT KEY,
+  GoodID INT,
+  OrderID INT,
+  TotalAmount DECIMAL
+);
+
+CREATE TABLE Payment (
+  ID INT AUTO_INCREMENT KEY,
+  Suma DECIMAL,
+  PaymentMethod VARCHAR(100),
+  DateOfPayment DATE,
+  OrderID INT
+);
+
+INSERT INTO Goods (Name, Price, Category, QuantityInStock) VALUES
+('Laptop', 1000.00, 'Electronics', 50),
+('Smartphone', 500.00, 'Electronics', 200),
+('Table', 150.00, 'Furniture', 30),
+('Chair', 80.00, 'Furniture', 100),
+('Shirt', 25.00, 'Clothing', 500),
+('ShirT', 30.00, 'Clothing', 4);
+
+INSERT INTO Сlient (Name, Surname, ContactNumber) VALUES
+('John', 'Doe', '1234567890'),
+('Jane', 'Smith', '0987654321'),
+('Alice', 'Johnson', '1122334455'),
+('Bob', 'Brown', '2233445566'),
+('Charlie', 'Davis', '3344556677'),
+('Eve', 'White', '222222222');
+
+INSERT INTO Orders (Name, ClientID, DateOfRegistration, Status) VALUES
+('Order1', 1, '2025-03-10', TRUE),
+('Order2', 2, '2025-03-11', FALSE),
+('Order3', 3, '2025-03-12', TRUE),
+('Order4', 4, '2025-03-13', TRUE),
+('Order5', 5, '2025-03-14', FALSE);
+
+INSERT INTO OrderDetails (GoodID, OrderID, TotalAmount) VALUES
+(1, 1, 2000.00),  -- 2 Laptop items in Order1
+(2, 1, 1000.00),  -- 2 Smartphone items in Order1
+(3, 2, 450.00),   -- 3 Table items in Order2
+(4, 3, 320.00),   -- 4 Chair items in Order3
+(5, 4, 125.00);   -- 5 Shirt items in Order4
+
+INSERT INTO Payment (Suma, PaymentMethod, DateOfPayment, OrderID) VALUES
+(2000.00, 'Credit Card', '2025-03-10', 1),
+(450.00, 'PayPal', '2025-01-11', 2),
+(320.00, 'Bank Transfer', '2025-03-12', 3),
+(125.00, 'Cash', '2025-01-13', 4),
+(500.00, 'Credit Card', '2025-03-14', 5),
+(500.00, 'Credit Card', '2025-02-14', 5),
+(500.00, 'Credit Card', '2025-03-14', 5);
+
+-- QUERY database
+-- 1
+SELECT * FROM Goods 
+WHERE Price > 500;
+-- 2
+SELECT OrderID, SUM(Suma) FROM Payment GROUP BY OrderID;
+-- 3
+SELECT * FROM Goods WHERE QuantityInStock < 5;
+-- 4
+SELECT SUM(OrderDetails.TotalAmount) AS SOLD, Goods.Name, Goods.Price, Goods.Category, Goods.QuantityInStock
+FROM Goods, OrderDetails, Orders
+WHERE OrderDetails.GoodID = Goods.ID AND Orders.ID = OrderDetails.OrderID
+GROUP BY OrderDetails.GoodID
+ORDER BY SOLD DESC LIMIT 1;
+-- 5
+SELECT COUNT(Payment.OrderID), CONCAT(Сlient.Name, ' ', Сlient.Surname) 
+FROM Payment, Сlient, Orders
+WHERE Payment.OrderID = Orders.ID AND Orders.ClientID = Сlient.ID
+GROUP BY Payment.OrderID HAVING COUNT(Payment.OrderID) >= 3;
+-- 6
+SELECT Orders.ID, CONCAT(Goods.Name, ' - ' ,OrderDetails.TotalAmount, "грн.")
+FROM Orders,Goods, OrderDetails
+WHERE Orders.ID = OrderDetails.OrderID
+AND OrderDetails.GoodID = Goods.ID
+ORDER BY Orders.ID ASC;
+-- 7
+SELECT * FROM Payment WHERE DateOfPayment > '2025-02-12';
+-- 8
+SELECT OrderID, SUM(Suma) / COUNT(OrderID) FROM Payment GROUP BY OrderID;
+-- 9
+SELECT CONCAT(Сlient.Name, " ", Сlient.Surname), Сlient.ContactNumber
+FROM Сlient, Orders
+WHERE Orders.ClientID = Сlient.ID AND Orders.ID IS NULL;
+-- 10
+SELECT * FROM Orders WHERE Status = false;
+
+
+
+
+https://sqlfiddle.com/mysql/online-compiler?id=7a1fc051-3418-4ade-ab25-b6672d19e896
